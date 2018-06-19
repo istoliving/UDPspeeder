@@ -11,13 +11,17 @@
 
 ![image0](/images/Capture2.PNG)
 
+[English](/README.md)
+
+[UDPspeeder Wiki](https://github.com/wangyu-/UDPspeeder/wiki)
+
 ##### 提示
 
-如果你嫌UDPspeeder+OpenVPN麻烦，你可以尝试tinyFecVPN，一个集成了UDPspeeder功能的VPN：
+如果你嫌UDPspeeder+OpenVPN麻烦，你可以尝试tinyfecVPN，一个集成了UDPspeeder功能的VPN：
 
-tinyFecVPN的repo:
+tinyfecVPN的repo:
 
-https://github.com/wangyu-/tinyFecVPN
+https://github.com/wangyu-/tinyfecVPN
 
 
 #### 效果
@@ -167,7 +171,7 @@ log and help options:
 数据发送和接受报告。开启后可以根据此数据推测出包速和丢包率等特征。`--report 10`表示每10秒生成一次报告。
 
 ##### `-i` 选项
-指定一个时间窗口，长度为n毫秒。同一个fec分组的数据在发送时候会被均匀分散到这n毫秒中。可以对抗突发性的丢包。默认值是0，因为这个功能需要用到时钟，在某些虚拟机里时钟不稳定，可能会导致个别包出现非常大的延迟，所以默认关掉了。这个功能很有用，默认参数效果不理想时可以尝试打开，比如用`-i 10`。这个选项的跟通信原理上常说的`交错fec` `交织fec`的原理是差不多的。
+指定一个时间窗口，长度为n毫秒。同一个fec分组的数据在发送时候会被均匀分散到这n毫秒中，可以对抗突发性的丢包，默认值是0(也就是不开启此功能)。 这个功能很有用，在推荐的参数效果不理想时可以尝试打开，比如用`-i 10`、`-i 20`。这个选项的跟通信原理上常说的`交错fec` `交织fec`的原理是差不多的。
 
 ##### `-j` 选项
 为原始数据的发送，增加一个延迟抖动值。这样上层应用计算出来的RTT方差会更大，以等待后续冗余包的到达，不至于发生在冗余包到达之前就触发重传的尴尬。配合-t选项使用。正常情况下跨国网络本身的延迟抖动就很大，可以不用设-j。这个功能也需要时钟，默认关掉了，不过一般情况应该不需要这个功能。
@@ -205,79 +209,22 @@ echo mode 0 > fifo.file
 ##### `--disable-obscure`
 UDPspeeder默认情况下会对每个发出的数据包随机填充和异或一些字节(4~32字节)，这样通过抓包难以发现你发了冗余数据，防止VPS被封。这个功能只是为了小心谨慎，即使你关掉这个功能，基本上也没问题，关掉可以省一些带宽和CPU。`--disable-obscure`可以关掉这个功能。
 
+# 推荐参数
+
+https://github.com/wangyu-/UDPspeeder/wiki/推荐设置
+
 # 使用经验
 
 https://github.com/wangyu-/UDPspeeder/wiki/使用经验
-
-# 应用
-
-#### UDPspeeder + OpenVPN加速任何流量，也适用于其他VPN
-![image0](/images/Capture2.PNG)
-
-可以和BBR/锐速叠加，不过BBR/锐速部署在VPS上只对本地和VPS间的流量有效，对本地和第三方服务器间的流量无效。
-
-需要在服务端开启ipforward和NAT。在客户端改路由表（可以手动修改，也可以由OpenVPN的redirect-gateway选项自动加好）。
-
-Linux具体配置: [UDPspeeder + openvpn config guide](/doc/udpspeeder_openvpn.md).
-
-Windows具体配置: [win10系统UDPspeeder+OpenVPN的完整设置](https://github.com/wangyu-/UDPspeeder/wiki/win10系统UDPspeeder-OpenVPN的完整设置)
-
-如果UDPspeeder + OpenVPN对你来说显得太麻烦了，你可以尝试一下tinyFecVPN,一个集成了UDPspeeder功能的VPN:
-
-https://github.com/wangyu-/tinyFecVPN/
-
-#### UDPspeeder + kcptun/finalspeed + $*** 同时加速tcp和udp流量
-如果你需要用加速的tcp看视频和下载文件，这样效果可能比没有BBR的UDPspeeder+vpn方案更好。另外，如果你需要玩游戏，但是嫌配VPN麻烦，也可以用这种方案。
-![image0](/images/cn/speeder_kcptun.PNG)
-
-具体配置方法简介:
-
-假设$\*\*\*  server监听在在44.55.66.77的443端口(tcp和udp同时)。用kcptun把tcp 443映射到本地的tcp 1234；用UDPspeeder把udp 443的映射到本地的udp 1234。
-然后让$\*\*\* client 去连127.0.0.1:1234就可以了，tcp和udp都被加速了。完整命令：
-```
-run at server side:
-./kcp_server  -l ":4000" -t "127.0.0.1:443" -mode fast2
-./speederv2 -s -l0.0.0.0:4001 -r127.0.0.1:443  -f20:10 -k "passwd"
-
-run at client side:
-./kcp_client  -l ":1234" -r "44.55.66.77:4000" -mode fast2
-./speederv2 -c -l0.0.0.0:1234 -r44.55.66.77:4001 -f20:10 -k "passwd"
-```
-
-这就是全部的命令了。Issue里有很多人困惑于怎么把tcp和udp流量"分开"；实际上tcp 443和udp 443是独立的2个端口，根本就不存在“分开”的问题。
-
-如果只需要加速UDP，不需要加速TCP，可以把kcptun换成其他的任意端口转发方式，比如ncat/socat/ssh tunnel/iptables/[tinyPortMapper](https://github.com/wangyu-/tinyPortMapper/releases)。
-
-如果你没有kcptun只有BBR/锐速的话，也可以把kcptun换成ncat/socat/ssh tunnel/iptables/[tinyPortMapper](https://github.com/wangyu-/tinyPortMapper/releases)。这样，TCP流量由锐速/BBR加速，UDP由UDPspeeder加速。
-
-另外，即使你不想使用$\*\*\*的TCP功能，你也必须把$\*\*\*的TCP端口转发过来，否则无法使用UDP功能，这是socks5协议的工作方式决定的。($\*\*\*-redir方式不受此限制)
-
-#### UDPspeeder + openvpn + $*** 混合方案，也适用于其他VPN
-也是我正在用的方案。优点是可以随时在vpn和$\*\*\*方案间快速切换。
-实际部署起来比图中看起来的还要简单。不需要改路由表，不需要写iptables规则和开启NAT，需要做的只是用openvpn分配的ip访问$*** server。
-
-![image0](/images/cn/speeder_vpn_s.PNG)
-
-(也可以把图中的$*** server换成其他的socks5 server，这样就不需要$*** client了)
-
-可以和BBR/锐速叠加，BBR/锐速只要部署在VPS上就有效。
-
-也可以用[tinyFecVPN](https://github.com/wangyu-/tinyFecVPN/) + $\*\*\* ，配置起来更简单。
-
-# 应用实例
-
-[win10系统UDPspeeder+OpenVPN的完整设置](https://github.com/wangyu-/UDPspeeder/wiki/win10系统UDPspeeder-OpenVPN的完整设置)
-
-[UDPspeeder+VPN运行在linux上，透明加速linux本机的网络](https://github.com/wangyu-/tinyFecVPN/wiki/tinyFecVPN运行在linux上，透明加速linux本机的网络)
-
-[UDPspeeder+VPN运行在虚拟机中，加速windows和局域网内其他主机的网络](https://github.com/wangyu-/tinyFecVPN/wiki/tinyFecVPN运行在虚拟机中，加速windows和局域网内其他主机的网络)
-
-[用树莓派做路由器，搭建透明代理，加速游戏主机的网络](https://github.com/wangyu-/UDPspeeder/wiki/用树莓派做路由器，搭建透明代理，加速游戏主机的网络)
-
-[UDPspeeder和udp2raw串联加速OpenVPN](https://github.com/wangyu-/UDPspeeder/wiki/UDPspeeder和udp2raw串联加速OpenVPN)
 
 # 编译教程
 暂时先参考udp2raw的这篇教程，几乎一样的过程。
 
 https://github.com/wangyu-/udp2raw-tunnel/blob/master/doc/build_guide.zh-cn.md
+
+# wiki
+
+更多内容请看 wiki:
+
+https://github.com/wangyu-/UDPspeeder/wiki
 

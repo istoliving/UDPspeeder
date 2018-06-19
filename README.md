@@ -1,8 +1,9 @@
 # UDPspeeder
-Network Speed-Up Tool. Boost your Connection on a High Lantency High Packet-Loss Link by using Forward Error Correction.
 
-When used alone, UDPspeeder speeds-up only UDP connection. Nevertheless, if you used UDPspeeder + any UDP-based VPN together,
-you can speed-up any traffic(include TCP/UDP/ICMP), currently OpenVPN/L2TP/ShadowVPN are confirmed to be supported。
+A Tunnel which Improves your Network Quality on a High-latency Lossy Link by using Forward Error Correction.
+
+When used alone, UDPspeeder improves only UDP connection. Nevertheless, if you used UDPspeeder + any UDP-based VPN together,
+you can improve any traffic(include TCP/UDP/ICMP), currently OpenVPN/L2TP/ShadowVPN are confirmed to be supported。
 
 ![](/images/en/udpspeeder.PNG)
 
@@ -12,16 +13,9 @@ or
 
 Assume your local network to your server is lossy. Just establish a VPN connection to your server with UDPspeeder + any UDP-based VPN, access your server via this VPN connection, then your connection quality will be significantly improved. With well-tuned parameters , you can easily reduce IP or UDP/ICMP packet-loss-rate to less than 0.01% . Besides reducing packet-loss-rate, UDPspeeder can also significantly improve your TCP latency and TCP single-thread download speed.
 
+[UDPspeeder Wiki](https://github.com/wangyu-/UDPspeeder/wiki)
+
 [简体中文](/doc/README.zh-cn.md)(内容更丰富)
-
-##### Note
-
-You can also try tinyFecVPN, a lightweight high-performance VPN with build-in FEC support:
-
-tinyFecVPN's repo:
-
-https://github.com/wangyu-/tinyFecVPN
-
 
 # Efficacy
 tested on a link with 100ms latency and 10% packet loss at both direction
@@ -62,7 +56,7 @@ Check wikipedia for more info, https://en.wikipedia.org/wiki/Reed–Solomon_erro
 ### Installing
 Download binary release from https://github.com/wangyu-/UDPspeeder/releases
 
-### Running (speed-up UDP only)
+### Running (improves UDP traffic only)
 Assume your server ip is 44.55.66.77, you have a service listening on udp port 7777.
 
 ```bash
@@ -81,14 +75,13 @@ Now connecting to UDP port 3333 at the client side is equivalent to connecting t
 
 `-k` enables simple XOR encryption
 
-##### Note2
-You can use udp2raw with UDPspeeder together to get better speed on some ISP with UDP QoS(UDP throttling).
 
-udp2raw's repo：
+# Improves all traffic with OpenVPN + UDPspeeder
 
-https://github.com/wangyu-/udp2raw-tunnel
+See [UDPspeeder + openvpn config guide](https://github.com/wangyu-/UDPspeeder/wiki/UDPspeeder-openvpn-config-guide).
 
 # Advanced Topic
+
 ### Full Options
 ```
 UDPspeeder V2
@@ -147,6 +140,19 @@ echo timeout 5 > fifo.file
 echo queue-len 100 > fifo.file
 echo mode 0 > fifo.file
 ```
-### Speed-Up any traffic with OpenVPN + UDPspeeder
 
-Check [UDPspeeder + openvpn config guide](/doc/udpspeeder_openvpn.md).
+
+# wiki
+Check wiki for more info:
+
+https://github.com/wangyu-/UDPspeeder/wiki
+
+# Related repo
+
+You can also try tinyfecVPN, a lightweight high-performance VPN with UDPspeeder's function built-in, repo:
+
+https://github.com/wangyu-/tinyfecVPN
+
+You can use udp2raw with UDPspeeder together to get better speed on some ISP with UDP QoS(UDP throttling), repo: 
+
+https://github.com/wangyu-/udp2raw-tunnel
